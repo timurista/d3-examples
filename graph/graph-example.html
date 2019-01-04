@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <title>Line chart from CSV using d3.js</title>
+    <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+    <script type="text/javascript" src="./data.js"></script>
+    <style></style>
+  </head>
+  <body>
+    <div id="bar-chart"></div>
+    <div id="chart-area"></div>
+
+    <script type="text/javascript">
+      // DATA
+      console.log("DATA", gData);
+      var data = gData;
+
+      var colors = x => ({ "-1": "red", "1": "green", "0": "lightblue" }[x]);
+      // bar chart
+
+      var barsize = width / data.length;
+      var margin = { left: 100, right: 10, top: 10, bottom: 100 };
+      var width = 800 - margin.left - margin.right;
+      var height = 400 - margin.top - margin.bottom;
+
+      var svg = d3
+        .select("#bar-chart")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+      // need scales
+      // domain to output range
+      // 0, 828
+      // var ymax = data.map(x => x.value).reduce((a, b) => Math.max(a, b));
+      // var ymin = data.map(x => x.value).reduce((a, b) => Math.min(a, b));
+
+      data = data.map(x => ({ ...x, date: new Date(x.date) }));
+      // y invert flips it
+      console.log("data", data);
+
+      var x = d3
+        .scaleTime()
+        .domain([d3.max(data, d => d.date), d3.min(data, d => d.date)])
+        .range([0, width]);
+      // .paddingInner(0.2)
+      // .paddingOuter(0.2);
+
+      var y = d3
+        .scaleLinear()
+        .domain([
+          d3.min(data, d => Math.abs(d.value)),
+          d3.max(data, d => Math.abs(d.value))
+        ])
+        .range([0, height]);
+      // .range([data[0].date, data[data.length - 1].date]);
+
+      var xAxis = d3
+        .axisBottom(x)
+        .ticks(20)
+        .tickFormat(d3.timeFormat("%b %e, %Y"));
+
+      var yAxis = d3.axisLeft(y);
+
+      console.log(y);
+
+      var g = svg
+        .append("g")
+        .attr(
+          "transform",
+          "translate(" + margin.left + ", " + margin.top + ")"
+        );
+
+      g.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", "translate(0, " + height + ")")
+        .call(xAxis)
+        .selectAll("text")
+        .attr("y", "10")
+        .attr("x", "-5")
+        .attr("text-anchor", "end")
+        .attr("transform", "rotate(-40)");
+
+      g.append("g")
+        .attr("class", "y-axis")
+        .call(yAxis);
+
+      var rects = g
+        .selectAll("rect")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("y", (d, i) => {
+          0;
+        })
+        .attr("x", (d, i) => {
+          return x(d.date);
+        })
+        .attr("width", 2)
+        .attr("height", d => {
+          return y(Math.abs(d.value));
+        })
+        .attr("fill", d => {
+          return colors(d.normalizedSent);
+        });
+
+      // CIRCLES
+      var svg = d3
+        .select("#chart-area")
+        .append("svg")
+        .attr("width", 2000)
+        .attr("height", 400);
+
+      var circles = svg.selectAll("circle").data(data);
+
+      circles
+        .enter()
+        .append("circle")
+        .attr("cx", function(d, i) {
+          // console.log(d, i);
+          return i * 50 + 25;
+        })
+        .attr("cy", function(d, i) {
+          // console.log(d, i);
+          return 25;
+        })
+        .attr("r", function(d, i) {
+          // console.log(d, i);
+          var x = d.normalizedSent.toString();
+          // console.log({ "-1": "red", "1": "green", "0": "lightblue" }[x]);
+          return d.value + 20;
+        })
+        .attr("fill", d => colors(d.normalizedSent));
+    </script>
+  </body>
+</html>
