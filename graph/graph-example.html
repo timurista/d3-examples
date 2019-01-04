@@ -12,15 +12,12 @@
     <div id="chart-area"></div>
 
     <script type="text/javascript">
-      // DATA
       console.log("DATA", gData);
       var data = gData;
 
       var colors = x => ({ "-1": "red", "1": "green", "0": "lightblue" }[x]);
-      // bar chart
-
       var barsize = width / data.length;
-      var margin = { left: 100, right: 10, top: 10, bottom: 100 };
+      var margin = { left: 50, right: 10, top: 10, bottom: 50 };
       var width = 800 - margin.left - margin.right;
       var height = 400 - margin.top - margin.bottom;
 
@@ -29,40 +26,21 @@
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom);
-      // need scales
-      // domain to output range
-      // 0, 828
-      // var ymax = data.map(x => x.value).reduce((a, b) => Math.max(a, b));
-      // var ymin = data.map(x => x.value).reduce((a, b) => Math.min(a, b));
-
-      // y invert flips it
-
-      // data.forEach(d => {
-      //   d.height = +d.height;
-      // });
 
       var x = d3
         .scaleTime()
         .domain([d3.max(data, d => d.date), d3.min(data, d => d.date)])
         .range([width, 0]);
-      // .paddingInner(0.2)
-      // .paddingOuter(0.2);
 
       console.log("MAXED DATA", gData, d3.max(data, d => d.totals));
       var y = d3
         .scaleLinear()
         .domain([0, d3.max(data, d => d.totals)])
         .range([height, 0]);
-      // .range([data[0].date, data[data.length - 1].date]);
 
-      var xAxis = d3
-        .axisBottom(x)
-        .ticks(20)
-        .tickFormat(d3.timeFormat("%b %e, %Y"));
+      var xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat("%b %e, %Y"));
 
       var yAxis = d3.axisLeft(y);
-
-      console.log(y);
 
       var g = svg
         .append("g")
@@ -71,9 +49,11 @@
           "translate(" + margin.left + ", " + margin.top + ")"
         );
 
-      g.append("g")
+      var gX = g
+        .append("g")
         .attr("class", "x-axis")
         .attr("transform", "translate(0, " + height + ")")
+        .attr("fill", "lightgrey")
         .call(xAxis)
         .selectAll("text")
         .attr("y", "10")
@@ -81,9 +61,22 @@
         .attr("text-anchor", "end")
         .attr("transform", "rotate(-40)");
 
-      g.append("g")
+      var gY = g
+        .append("g")
         .attr("class", "y-axis")
+        .attr("fill", "#BDBDBD")
         .call(yAxis);
+
+      svg
+        .append("text")
+        .attr("class", "y-label")
+        .attr("y", 0)
+        .attr("x", (-1 * height) / 2)
+        .attr("dy", "1em")
+        .attr("text-anchor", "middle")
+        .attr("transform", "rotate(-90)")
+        .attr("fill", "lightgrey")
+        .text("Articles");
 
       var area = d3
         .area()
@@ -187,60 +180,44 @@
         // );
       };
 
-      generateArea(g, positives, "green");
-      generateArea(g, negatives, "red");
-      generateArea(g, neturals, "blue");
-      generateArea(g, totals, "lightgrey");
+      function update(
+        checked = [
+          "positives",
+          "negatives",
+          "neutrals",
+          "totals",
+          "cumulativeSentiment"
+        ]
+      ) {
+        generateArea(g, positives, "green");
+        generateArea(g, negatives, "red");
+        generateArea(g, neturals, "blue");
+        generateArea(g, totals, "lightgrey");
+        generateSentimentLine(g, cumulativeSentiment);
+      }
 
-      generateSentimentLine(g, cumulativeSentiment);
+      // register zoom
+      // Zoom Function
 
-      // var rects = g
-      //   .selectAll("rect")
-      //   .data(data)
-      //   .enter()
-      //   .append("rect")
-      //   .attr("y", (d, i) => {
-      //     console.log(d);
-      //     return y(d.value);
-      //   })
-      //   .attr("x", (d, i) => {
-      //     return x(d.date);
-      //   })
-      //   .attr("width", 2)
-      //   .attr("height", d => {
-      //     return height - y(d.value);
-      //   })
-      //   .attr("fill", d => {
-      //     return colors(d.normalizedSent);
-      //   });
+      // function zoomFunction() {
+      //   // create new scale ojects based on event
+      //   var new_xScale = d3.event.transform.rescaleX(x);
+      //   var new_yScale = d3.event.transform.rescaleY(y);
+      //   console.log(d3.event.transform);
 
-      // CIRCLES
-      // var svg = d3
-      //   .select("#chart-area")
-      //   .append("svg")
-      //   .attr("width", 2000)
-      //   .attr("height", 400);
+      //   // update axes
+      //   gX.call(xAxis.scale(new_xScale));
+      //   gY.call(yAxis.scale(new_yScale));
 
-      // var circles = svg.selectAll("circle").data(data);
+      //   // update circle
+      //   // update();
+      // }
 
-      // circles
-      //   .enter()
-      //   .append("circle")
-      //   .attr("cx", function(d, i) {
-      //     // console.log(d, i);
-      //     return i * 50 + 25;
-      //   })
-      //   .attr("cy", function(d, i) {
-      //     // console.log(d, i);
-      //     return 25;
-      //   })
-      //   .attr("r", function(d, i) {
-      //     // console.log(d, i);
-      //     var x = d.normalizedSent.toString();
-      //     // console.log({ "-1": "red", "1": "green", "0": "lightblue" }[x]);
-      //     return d.value + 20;
-      //   })
-      //   .attr("fill", d => colors(d.normalizedSent));
+      // var zoom = d3.zoom().on("zoom", zoomFunction);
+      // apply zoom function
+      // g.call(zoom);
+
+      update();
     </script>
   </body>
 </html>
