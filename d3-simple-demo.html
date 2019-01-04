@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <title>Line chart from CSV using d3.js</title>
+    <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+    <style></style>
+  </head>
+  <body>
+    <div id="chart-area"></div>
+
+    <script type="text/javascript">
+      var svg = d3
+        .select("#chart-area")
+        .append("svg")
+        .attr("width", 400)
+        .attr("height", 400);
+
+      var circle = svg
+        .append("circle")
+        .attr("cx", 200)
+        .attr("cy", 200)
+        .attr("r", 100)
+        .attr("fill", "blue");
+
+      var sqaure = svg
+        .append("rect")
+        .attr("x", 20)
+        .attr("y", 20)
+        .attr("width", 60)
+        .attr("height", 40)
+        .attr("fill", "red");
+    </script>
+  </body>
+</html>
