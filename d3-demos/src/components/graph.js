@@ -57,7 +57,6 @@ class Graph extends Component {
 
     return (
       <svg className="container" height={height} width={width}>
-        {/* ADD: our spark line as a path (inside a group, for convenient styling) */}
         <g className="line">
           <path d={linePath} />
         </g>
