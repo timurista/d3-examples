@@ -35,24 +35,24 @@
       // var ymax = data.map(x => x.value).reduce((a, b) => Math.max(a, b));
       // var ymin = data.map(x => x.value).reduce((a, b) => Math.min(a, b));
 
-      data = data.map(x => ({ ...x, date: new Date(x.date) }));
       // y invert flips it
-      console.log("data", data);
+
+      // data.forEach(d => {
+      //   d.height = +d.height;
+      // });
 
       var x = d3
         .scaleTime()
         .domain([d3.max(data, d => d.date), d3.min(data, d => d.date)])
-        .range([0, width]);
+        .range([width, 0]);
       // .paddingInner(0.2)
       // .paddingOuter(0.2);
 
+      console.log("MAXED DATA", gData, d3.max(data, d => d.totals));
       var y = d3
         .scaleLinear()
-        .domain([
-          d3.min(data, d => Math.abs(d.value)),
-          d3.max(data, d => Math.abs(d.value))
-        ])
-        .range([0, height]);
+        .domain([0, d3.max(data, d => d.totals)])
+        .range([height, 0]);
       // .range([data[0].date, data[data.length - 1].date]);
 
       var xAxis = d3
@@ -85,52 +85,162 @@
         .attr("class", "y-axis")
         .call(yAxis);
 
-      var rects = g
-        .selectAll("rect")
-        .data(data)
-        .enter()
-        .append("rect")
-        .attr("y", (d, i) => {
-          0;
-        })
-        .attr("x", (d, i) => {
+      var area = d3
+        .area()
+        .x(function(d) {
           return x(d.date);
         })
-        .attr("width", 2)
-        .attr("height", d => {
-          return y(Math.abs(d.value));
+        .y0(height)
+        .y1(function(d, i) {
+          return y(d.value);
         })
-        .attr("fill", d => {
-          return colors(d.normalizedSent);
-        });
+        .curve(d3.curveBasis);
+
+      // define the line
+      var valueline = d3
+        .line()
+        .x(function(d) {
+          return x(d.date);
+        })
+        .y(function(d, i) {
+          return y(d.value);
+        })
+        .curve(d3.curveBasis);
+
+      const positives = data.map(x => ({ date: x.date, value: x.positives }));
+      const negatives = data.map(x => ({ date: x.date, value: x.negatives }));
+      const neturals = data.map(x => ({ date: x.date, value: x.neutrals }));
+      const totals = data.map(x => ({ date: x.date, value: x.totals }));
+      const cumulativeSentiment = data.map(x => ({
+        date: x.date,
+        value: x.cumulativeSentiment
+      }));
+
+      // console.log(positives);
+      const generateArea = (g, data, color) => {
+        g.append("path")
+          .data([data])
+          .attr("class", "area")
+          .attr("d", area)
+          .attr("fill", color)
+          .attr("fill-opacity", "0.3");
+
+        g.append("path")
+          .data([data])
+          .attr("class", "line")
+          .attr("d", valueline)
+          .attr("fill-opacity", "0")
+          .attr("stroke", color)
+          .attr("stroke-opacity", "0.8");
+      };
+
+      generateSentimentLine = (g, data) => {
+        var ySent = d3
+          .scaleLinear()
+          .domain([d3.min(data, d => d.value), d3.max(data, d => d.value)])
+          .range([height, 0]);
+        var sentimentValueLine = d3
+          .line()
+          .x(function(d) {
+            return x(d.date);
+          })
+          .y(function(d, i) {
+            return ySent(d.value);
+          })
+          .curve(d3.curveBasis);
+
+        var defs = g.append("defs");
+
+        var gradient = defs
+          .append("linearGradient")
+          .attr("id", "svgGradient")
+          .attr("x1", "0%")
+          .attr("x2", "0%")
+          .attr("y1", "100%")
+          .attr("y2", "0%");
+
+        gradient
+          .append("stop")
+          .attr("class", "start")
+          .attr("offset", "0%")
+          .attr("stop-color", "#FF7474")
+          .attr("stop-opacity", 1);
+
+        gradient
+          .append("stop")
+          .attr("class", "end")
+          .attr("offset", "100%")
+          .attr("stop-color", "#8CE984")
+          .attr("stop-opacity", 1);
+
+        g.append("path")
+          .data([data])
+          .attr("class", "sentiment-line")
+          .attr("d", sentimentValueLine)
+          .attr("fill-opacity", "0")
+          .attr("stroke-opacity", "0.8")
+          .attr("stroke-width", "3px")
+          .attr("stroke", "url(#svgGradient)");
+        // .attr(
+        //   "transform",
+        //   "translate(0, -" + (height + margin.bottom) / 2 + ")"
+        // );
+      };
+
+      generateArea(g, positives, "green");
+      generateArea(g, negatives, "red");
+      generateArea(g, neturals, "blue");
+      generateArea(g, totals, "lightgrey");
+
+      generateSentimentLine(g, cumulativeSentiment);
+
+      // var rects = g
+      //   .selectAll("rect")
+      //   .data(data)
+      //   .enter()
+      //   .append("rect")
+      //   .attr("y", (d, i) => {
+      //     console.log(d);
+      //     return y(d.value);
+      //   })
+      //   .attr("x", (d, i) => {
+      //     return x(d.date);
+      //   })
+      //   .attr("width", 2)
+      //   .attr("height", d => {
+      //     return height - y(d.value);
+      //   })
+      //   .attr("fill", d => {
+      //     return colors(d.normalizedSent);
+      //   });
 
       // CIRCLES
-      var svg = d3
-        .select("#chart-area")
-        .append("svg")
-        .attr("width", 2000)
-        .attr("height", 400);
+      // var svg = d3
+      //   .select("#chart-area")
+      //   .append("svg")
+      //   .attr("width", 2000)
+      //   .attr("height", 400);
 
-      var circles = svg.selectAll("circle").data(data);
+      // var circles = svg.selectAll("circle").data(data);
 
-      circles
-        .enter()
-        .append("circle")
-        .attr("cx", function(d, i) {
-          // console.log(d, i);
-          return i * 50 + 25;
-        })
-        .attr("cy", function(d, i) {
-          // console.log(d, i);
-          return 25;
-        })
-        .attr("r", function(d, i) {
-          // console.log(d, i);
-          var x = d.normalizedSent.toString();
-          // console.log({ "-1": "red", "1": "green", "0": "lightblue" }[x]);
-          return d.value + 20;
-        })
-        .attr("fill", d => colors(d.normalizedSent));
+      // circles
+      //   .enter()
+      //   .append("circle")
+      //   .attr("cx", function(d, i) {
+      //     // console.log(d, i);
+      //     return i * 50 + 25;
+      //   })
+      //   .attr("cy", function(d, i) {
+      //     // console.log(d, i);
+      //     return 25;
+      //   })
+      //   .attr("r", function(d, i) {
+      //     // console.log(d, i);
+      //     var x = d.normalizedSent.toString();
+      //     // console.log({ "-1": "red", "1": "green", "0": "lightblue" }[x]);
+      //     return d.value + 20;
+      //   })
+      //   .attr("fill", d => colors(d.normalizedSent));
     </script>
   </body>
 </html>
