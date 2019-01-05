@@ -174,10 +174,6 @@
           .attr("stroke-opacity", "0.8")
           .attr("stroke-width", "3px")
           .attr("stroke", "url(#svgGradient)");
-        // .attr(
-        //   "transform",
-        //   "translate(0, -" + (height + margin.bottom) / 2 + ")"
-        // );
       };
 
       function update(
@@ -189,11 +185,22 @@
           "cumulativeSentiment"
         ]
       ) {
+        // data join new data with element if any
+        // selectAllText.join
+
+        // Exit is remove old elements
+        d3.selectAll(".line").remove();
+
+        d3.selectAll(".area").remove();
+
+        d3.selectAll(".sentiment-line").remove();
+
         generateArea(g, positives, "green");
-        generateArea(g, negatives, "red");
-        generateArea(g, neturals, "blue");
-        generateArea(g, totals, "lightgrey");
+        // generateArea(g, negatives, "red");
+        // generateArea(g, neturals, "blue");
+        // generateArea(g, totals, "lightgrey");
         generateSentimentLine(g, cumulativeSentiment);
+        console.log("GROUPS", g);
       }
 
       // register zoom
@@ -221,8 +228,10 @@
 
       // add interval loop
       // d3.interval(function() {
-      //   console.log("hello world");
+      //   update();
       // }, 1000);
+
+      // D3 UPDATE PATTERN
     </script>
   </body>
 </html>
