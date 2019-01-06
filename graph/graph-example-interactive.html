@@ -13,7 +13,7 @@
 
     <script type="text/javascript">
       console.log("DATA", gData);
-      var data = gData;
+      var data = gData.slice(0, 50);
 
       var colors = x => ({ "-1": "red", "1": "green", "0": "lightblue" }[x]);
       var barsize = width / data.length;
@@ -39,7 +39,6 @@
         .range([height, 0]);
 
       var xAxis = d3.axisBottom(x).tickFormat(d3.timeFormat("%b %e, %Y"));
-
       var yAxis = d3.axisLeft(y);
 
       var g = svg
@@ -113,7 +112,7 @@
       const generateArea = (g, data, color) => {
         g.append("path")
           .data([data])
-          .attr("class", "area")
+          .attr("class", "area ")
           .attr("d", area)
           .attr("fill", color)
           .attr("fill-opacity", "0.3");
@@ -176,6 +175,81 @@
           .attr("stroke", "url(#svgGradient)");
       };
 
+      let focus = svg
+        .append("g")
+        .attr("class", "focus")
+        .style("display", "none")
+        .style("opacity", "0.7");
+
+      focus.append("circle").attr("r", 4.5);
+
+      focus
+        .append("line")
+        .classed("x", true)
+        .attr("fill", "none")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1.5px")
+        .attr("stroke-dasharray", "3 3");
+
+      focus
+        .append("line")
+        .classed("y", true)
+        .attr("fill", "none")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1.5px")
+        .attr("stroke-dasharray", "3 3");
+
+      focus
+        .append("text")
+        .attr("x", 9)
+        .attr("dy", ".5em");
+
+      // mouse move functions
+      g.on("mouseover", () => focus.style("display", null))
+        .on("mouseout", () => focus.style("display", "none"))
+        .on("mousemove", mousemove);
+
+      const bisectDate = d3.bisector(d => d.date).right;
+
+      function mousemove() {
+        const x0 = x.invert(d3.mouse(this)[0]);
+        console.log("MOUSE MOVE", d3.mouse(this), x0);
+        const i = bisectDate(data.sort((a, b) => a.date - b.date), x0);
+        console.log("BISECT", i);
+        const d0 = data[i - 1];
+        const d1 = data[i];
+        const d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+
+        // get point on the path
+        // const path = d3.select(".line-positives").getPointAtLength();
+
+        // TODO
+
+        // https://bl.ocks.org/larsenmtl/e3b8b7c2ca4787f77d78f58d41c3da91
+        console.log(x(d.date));
+        focus.attr(
+          "transform",
+          `translate(${x(d.date) + margin.left}, ${y(d.positives) +
+            margin.top})`
+        );
+        console.log(focus);
+        focus
+          .select("line.x")
+          .attr("x1", 0)
+          .attr("x2", -x(d.date))
+          .attr("y1", 0)
+          .attr("y2", 0);
+
+        focus
+          .select("line.y")
+          .attr("x1", 0)
+          .attr("x2", 0)
+          .attr("y1", 0)
+          .attr("y2", height - y(d.positives));
+
+        focus.select("text").text(d.positives);
+      }
+
       function update(
         checked = [
           "positives",
@@ -195,7 +269,7 @@
 
         d3.selectAll(".sentiment-line").remove();
 
-        generateArea(g, positives, "green");
+        generateArea(g, positives, "green", "positives");
         // generateArea(g, negatives, "red");
         // generateArea(g, neturals, "blue");
         // generateArea(g, totals, "lightgrey");
