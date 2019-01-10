@@ -94,6 +94,8 @@ const generateArea = (g, data, color) => {
     .attr("class", "area")
     .attr("d", area)
     .attr("fill", color)
+    .attr("fill-opacity", "0")
+    .transition(d3.transition().duration(400))
     .attr("fill-opacity", "0.3");
 
   g.append("path")
@@ -149,9 +151,12 @@ generateSentimentLine = (g, data) => {
     .attr("class", "sentiment-line")
     .attr("d", sentimentValueLine)
     .attr("fill-opacity", "0")
-    .attr("stroke-opacity", "0.8")
     .attr("stroke-width", "3px")
-    .attr("stroke", "url(#svgGradient)");
+    .attr("stroke-opacity", "0")
+    .attr("width", "0")
+    .attr("stroke", "url(#svgGradient)")
+    .transition(d3.transition().duration(500))
+    .attr("stroke-opacity", "0.8");
 };
 
 function update() {
