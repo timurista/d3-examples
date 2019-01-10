@@ -1099,7 +1099,7 @@ const patents = [
 ];
 
 const getDate = x => {
-  return `${x.getFullYear()}-${x.getMonth() + 1}-1`;
+  return `${x.getFullYear()}/${x.getMonth() + 1}/1`;
 };
 
 let p = patents.map(x => ({

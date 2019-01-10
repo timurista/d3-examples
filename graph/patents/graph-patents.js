@@ -62,25 +62,25 @@ svg
 
 var area = d3
   .area()
+  .curve(d3.curveMonotoneX)
   .x(function(d) {
     return x(d.date);
   })
   .y0(height)
   .y1(function(d, i) {
     return y(d.value);
-  })
-  .curve(d3.curveBasis);
+  });
 
 // define the line
 var valueline = d3
   .line()
+  .curve(d3.curveMonotoneX)
   .x(function(d) {
     return x(d.date);
   })
   .y(function(d, i) {
     return y(d.value);
-  })
-  .curve(d3.curveBasis);
+  });
 
 const count = data.map(x => ({ date: x.date, value: x.count }));
 const sentiment = data.map(x => ({
@@ -114,19 +114,19 @@ generateSentimentLine = (g, data) => {
     .range([height, 0]);
   var sentimentValueLine = d3
     .line()
+    .curve(d3.curveBasis)
     .x(function(d) {
       return x(d.date);
     })
     .y(function(d, i) {
       return ySent(d.value);
-    })
-    .curve(d3.curveBasis);
+    });
 
   var defs = g.append("defs");
 
   var gradient = defs
     .append("linearGradient")
-    .attr("id", "svgGradient")
+    .attr("id", "svg_gradient")
     .attr("x1", "0%")
     .attr("x2", "0%")
     .attr("y1", "100%")
@@ -154,7 +154,7 @@ generateSentimentLine = (g, data) => {
     .attr("stroke-width", "3px")
     .attr("stroke-opacity", "0")
     .attr("width", "0")
-    .attr("stroke", "url(#svgGradient)")
+    .attr("stroke", "url(#svg_gradient)")
     .transition(d3.transition().duration(500))
     .attr("stroke-opacity", "0.8");
 };
