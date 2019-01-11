@@ -180,6 +180,48 @@
         // );
       };
 
+      function generateLegend(g) {
+        var legend = g
+          .append("g")
+          .attr("transform", `translate(${width - 10}, ${margin.top})`);
+
+        var labels = [
+          "Positive",
+          "Negative",
+          "Neutral",
+          "Total",
+          "Sentiment Over Time"
+        ];
+
+        var labelColors = {
+          Positive: "lightgreen",
+          Negative: "red",
+          Neutral: "purple",
+          Total: "lightgrey",
+          "Sentiment Over Time": "orange"
+        };
+
+        labels.forEach((l, index) => {
+          let legendRow = legend
+            .append("g")
+            .attr("transform", `translate(0, ${index * 20})`);
+
+          legendRow
+            .append("rect")
+            .attr("width", 10)
+            .attr("height", 10)
+            .attr("fill", labelColors[l]);
+
+          legendRow
+            .append("text")
+            .attr("x", -10)
+            .attr("y", 10)
+            .attr("text-anchor", "end")
+            .style("text-transform", "capitalize")
+            .text(l);
+        });
+      }
+
       function update(
         checked = [
           "positives",
@@ -189,6 +231,9 @@
           "cumulativeSentiment"
         ]
       ) {
+        // legend time
+        generateLegend(g);
+
         generateArea(g, positives, "green");
         generateArea(g, negatives, "red");
         generateArea(g, neturals, "blue");
