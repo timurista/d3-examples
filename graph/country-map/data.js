@@ -50,7 +50,11 @@ const y = [
 ];
 
 // get lat lang for countries here
-const topCountries = y.map(x => ({
+let topCountries = y.map(x => ({
   ...x,
   ...countryCodeMap[x.countryAbbrev.toLowerCase()]
 }));
+
+topCountries = topCountries.map(x => ({ ...x, lat: x.long, long: x.lat }));
+
+const countryCords = topCountries.map(x => [Number(x.lat), Number(x.long)]);
