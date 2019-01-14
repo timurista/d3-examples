@@ -50,6 +50,10 @@ const y = [
 ];
 
 // get lat lang for countries here
+// iterate over and get counts
+// let counts = {}
+// for ()
+
 let topCountries = y.map(x => ({
   ...x,
   ...countryCodeMap[x.countryAbbrev.toLowerCase()]

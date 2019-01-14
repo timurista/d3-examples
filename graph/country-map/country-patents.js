@@ -41,16 +41,23 @@ var map = g
   .enter()
   .append("path")
   .attr("d", d => {
-    console.log("MAP LOADING", path(d), d);
     return path(d);
-  });
+  })
+  .attr("fill", "#777");
 
-// });
+// TOOLTIP
+tip = d3
+  .tip()
+  .attr("class", "d3-tip")
+  .html((d, i) => {
+    console.log(d, i);
+    let item = topCountries[i];
+    let text = `<strong>Country: </strong><span>${item.countryAbbrev}</span>`;
+    return text;
+  });
+g.call(tip);
 
 function update() {
-  aa = [-122.490402, 37.786453];
-  bb = [-122.389809, 37.72728];
-
   console.log("updating...");
 
   g.append("g")
@@ -77,30 +84,6 @@ function update() {
     })
     .attr("fill", "red");
 
-  // console.log("CIRLCES", d3.selectAll(".count-circle"));
-  // d3.selectAll(".count-circle")
-  //   .append("text")
-  //   .attr("x", "50%")
-  //   .attr("y", "50%")
-  //   .attr("text-anchor", "middle")
-  //   .attr("dy", "5em")
-  //   .attr("fill", "white");
-
-  // .attr("x", function(d) {
-  //   console.log("X", d);
-  //   return projection(d)[0];
-  // })
-  // .attr("y", function(d) {
-  //   console.log("Y", d, projection(d));
-  //   return projection(d)[1];
-  // })
-  // .text(function(d, i) {
-  //   if (topCountries[i]) {
-  //     return topCountries[i].patentCount;
-  //   }
-  // })
-  // .attr("fill", "white");
-
   g.append("g")
     .selectAll("text")
     .data(countryCords)
@@ -121,32 +104,9 @@ function update() {
     })
     .attr("dy", ".3em")
     .attr("text-anchor", "middle")
-    .attr("fill", "white");
-
-  // .selectAll("path")
-  // .data(countryCords)
-  // .enter()
-  // .append("path")
-  // .attr("d", d => {
-  //   console.log("ENTERING", path(d), d);
-  //   return d3.geoPath().projection(d);
-  // })
-  // .attr("fill", "red");
-
-  // g.data(data)
-  //   .append("circle")
-  //   .attr("cx", d => {
-  //     const geo = [Number(d.lat), Number(d.long)];
-  //     console.log(d);
-  //     return projection(geo)[0];
-  //   })
-  //   .attr("cy", d => {
-  //     const geo = [Number(d.lat), Number(d.long)];
-  //     console.log(projection(geo));
-  //     return projection(geo)[1];
-  //   })
-  //   .attr("r", "20px")
-  //   .attr("fill", "red");
+    .attr("fill", "white")
+    .on("mouseover", tip.show)
+    .on("mouseout", tip.hide);
 }
 
 update();
