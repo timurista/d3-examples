@@ -56,9 +56,9 @@ const y = [
 
 let topCountries = y.map(x => ({
   ...x,
-  ...countryCodeMap[x.countryAbbrev.toLowerCase()]
+  ...countryCodeMap[x.countryAbbrev]
 }));
 
-topCountries = topCountries.map(x => ({ ...x, lat: x.long, long: x.lat }));
+// topCountries = topCountries.map(x => ({ ...x, lat: x.long, long: x.lat }));
 
 const countryCords = topCountries.map(x => [Number(x.lat), Number(x.long)]);

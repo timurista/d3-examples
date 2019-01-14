@@ -30,14 +30,9 @@ var geoPoint = {
 
 var g = svg.append("g");
 
-// fetch("world-110m.v1.json")
-//   .then(res => res.json())
-//   .then(topology => {
-console.log(worldTopo);
-let topology = worldTopo;
 var map = g
   .selectAll("path")
-  .data(topojson.object(topology, topology.objects.countries).geometries)
+  .data(topojson.object(worldTopo, worldTopo.objects.countries).geometries)
   .enter()
   .append("path")
   .attr("d", d => {
@@ -52,7 +47,9 @@ tip = d3
   .html((d, i) => {
     console.log(d, i);
     let item = topCountries[i];
-    let text = `<strong>Country: </strong><span>${item.countryAbbrev}</span>`;
+    let text = item.name
+      ? `<strong>Country: </strong><span>${item.name}</span>`
+      : `<strong>Country Code: </strong><span>${item.countryAbbrev}</span>`;
     return text;
   });
 g.call(tip);
