@@ -67,7 +67,7 @@ function update(timeSlice) {
 
   let counts = {};
   for (let p of filteredPatents) {
-    console.log(p, p.country);
+    // console.log(p, p.country);
     counts[p.country] = ++counts[p.country] || 1;
   }
 
@@ -85,7 +85,7 @@ function update(timeSlice) {
     Number(x.lat),
     Number(x.long)
   ]);
-  console.log("COUNTRY MAPS", filteredCountries);
+  // console.log("COUNTRY MAPS", filteredCountries);
 
   var t = d3.transition().duration(100);
 
@@ -102,11 +102,9 @@ function update(timeSlice) {
     .attr("class", "count-circle")
     .append("circle")
     .attr("cx", function(d) {
-      console.log("CX", d);
       return projection(d)[0];
     })
     .attr("cy", function(d) {
-      console.log("CY", d, projection(d));
       return projection(d)[1];
     })
     .attr("r", function(d, i) {
@@ -124,11 +122,9 @@ function update(timeSlice) {
     .enter()
     .append("text")
     .attr("x", function(d) {
-      console.log("X", d);
       return projection(d)[0];
     })
     .attr("y", function(d) {
-      console.log("Y", d, projection(d));
       return projection(d)[1];
     })
     .text(function(d, i) {
@@ -148,13 +144,29 @@ const startTime = countryTimeBuckets[0];
 let time = 0;
 
 function step() {
-  console.log("stepping", time);
+  // console.log("stepping", time);
   time = time < countryTimeBuckets.length ? time + 1 : 0;
   update(time);
 }
 
 // run step function
 
-d3.interval(function() {
-  step();
-}, 200);
+// d3.interval(function() {
+//   step();
+// }, 200);
+
+const playBtn = document.querySelector("#play");
+console.log("PLAY", playBtn);
+let interval;
+
+playBtn.addEventListener("click", () => {
+  if (playBtn.textContent === "Play") {
+    console.log("clicked play");
+    playBtn.textContent = "Pause";
+    interval = setInterval(step, 1000);
+  } else if (playBtn.textContent === "Pause") {
+    playBtn.textContent = "Play";
+    console.log("clicked pause");
+    clearInterval(interval);
+  }
+});
