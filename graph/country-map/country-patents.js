@@ -59,6 +59,15 @@ const countryTimeBuckets = [
 ].sort((a, b) => a - b);
 // console.log("MAPPING TIME", patents.map(x => x));
 
+const timeLabel = g
+  .append("text")
+  .attr("y", height - 10)
+  .attr("x", width - 40)
+  .attr("font-size", "40px")
+  .attr("opacity", "0.4")
+  .attr("text-anchor", "middle")
+  .text(countryTimeBuckets[0]);
+
 function update(timeSlice) {
   console.log("updating...");
   const filteredPatents = patents.filter(
@@ -137,6 +146,8 @@ function update(timeSlice) {
     .attr("fill", "white")
     .on("mouseover", tip.show)
     .on("mouseout", tip.hide);
+
+  timeLabel.text(countryTimeBuckets[timeSlice]);
 }
 
 const endTime = countryTimeBuckets[countryTimeBuckets.length];
@@ -148,12 +159,6 @@ function step() {
   time = time < countryTimeBuckets.length ? time + 1 : 0;
   update(time);
 }
-
-// run step function
-
-// d3.interval(function() {
-//   step();
-// }, 200);
 
 const playBtn = document.querySelector("#play");
 console.log("PLAY", playBtn);
@@ -170,3 +175,6 @@ playBtn.addEventListener("click", () => {
     clearInterval(interval);
   }
 });
+
+// kick off update
+update(0);
