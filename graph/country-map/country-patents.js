@@ -107,3 +107,8 @@ function update() {
 }
 
 update();
+
+function step() {
+  time = time < 214 ? time * 1 : 0;
+  update();
+}

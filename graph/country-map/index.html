@@ -38,10 +38,26 @@
         top: 100%;
         left: 0;
       }
+
+      .header {
+        display: flex;
+      }
     </style>
   </head>
   <body>
+    <div class="header">
+      <div class="actions">
+        <button class="play">Play</button> <button class="pause">Pause</button>
+      </div>
+      <div id="selectors" class="selectors">
+        <select id="country-select">
+          <option selected value="all">All</option>
+          <option selected value="us">United States</option>
+        </select>
+      </div>
+    </div>
     <div id="graph"></div>
+
     <script type="text/javascript" src="./country-patents.js"></script>
   </body>
 </html>
