@@ -54,12 +54,49 @@ tip = d3
   });
 g.call(tip);
 
-function update() {
-  console.log("updating...");
+const countryTimeBuckets = [
+  ...new Set(patents.map(x => new Date(x.filingDate).getFullYear()))
+].sort((a, b) => a - b);
+// console.log("MAPPING TIME", patents.map(x => x));
 
-  g.append("g")
+function update(timeSlice) {
+  console.log("updating...");
+  const filteredPatents = patents.filter(
+    x => new Date(x.filingDate).getFullYear() <= countryTimeBuckets[timeSlice]
+  );
+
+  let counts = {};
+  for (let p of filteredPatents) {
+    console.log(p, p.country);
+    counts[p.country] = ++counts[p.country] || 1;
+  }
+
+  // console.log("COUNTS", patents);
+  let d = Object.entries(counts).map(([countryAbbrev, patentCount]) => ({
+    countryAbbrev,
+    patentCount
+  }));
+  const filteredCountries = d.map(x => ({
+    ...x,
+    ...countryCodeMap[x.countryAbbrev]
+  }));
+
+  const filteredCords = filteredCountries.map(x => [
+    Number(x.lat),
+    Number(x.long)
+  ]);
+  console.log("COUNTRY MAPS", filteredCountries);
+
+  var t = d3.transition().duration(100);
+
+  var circles = g
+    .append("g")
     .selectAll("circle")
-    .data(countryCords)
+    .data(filteredCords);
+
+  // circles.exit().remove();
+
+  circles
     .enter()
     .append("g")
     .attr("class", "count-circle")
@@ -73,9 +110,9 @@ function update() {
       return projection(d)[1];
     })
     .attr("r", function(d, i) {
-      if (topCountries[i]) {
+      if (filteredCountries[i]) {
         const weight =
-          topCountries[i].patentCount / topCountries[0].patentCount;
+          filteredCountries[i].patentCount / filteredCountries[0].patentCount;
         return `${Math.floor(weight * 30 + 15).toFixed(0)}px`;
       }
     })
@@ -83,7 +120,7 @@ function update() {
 
   g.append("g")
     .selectAll("text")
-    .data(countryCords)
+    .data(filteredCords)
     .enter()
     .append("text")
     .attr("x", function(d) {
@@ -95,8 +132,8 @@ function update() {
       return projection(d)[1];
     })
     .text(function(d, i) {
-      if (topCountries[i]) {
-        return topCountries[i].patentCount;
+      if (filteredCountries[i]) {
+        return filteredCountries[i].patentCount;
       }
     })
     .attr("dy", ".3em")
@@ -106,9 +143,18 @@ function update() {
     .on("mouseout", tip.hide);
 }
 
-update();
+const endTime = countryTimeBuckets[countryTimeBuckets.length];
+const startTime = countryTimeBuckets[0];
+let time = 0;
 
 function step() {
-  time = time < 214 ? time * 1 : 0;
-  update();
+  console.log("stepping", time);
+  time = time < countryTimeBuckets.length ? time + 1 : 0;
+  update(time);
 }
+
+// run step function
+
+d3.interval(function() {
+  step();
+}, 200);
