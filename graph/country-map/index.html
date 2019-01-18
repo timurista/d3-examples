@@ -42,6 +42,12 @@
       .header {
         display: flex;
       }
+
+      .hidden-circle,
+      .hidden-text {
+        opacity: 0;
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -50,9 +56,9 @@
         <button class="play" id="play">Play</button
         ><button class="reset" id="reset">Reset</button>
       </div>
-      <div id="selectors" class="selectors">
+      <div id="country-selector" class="selectors">
         <select id="country-select">
-          <option selected value="all">All</option>
+          <option selected value="all" selected>All</option>
           <option selected value="us">United States</option>
         </select>
       </div>
