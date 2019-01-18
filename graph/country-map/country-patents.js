@@ -102,14 +102,29 @@ function update(timeSlice) {
     .append("g")
     .selectAll("circle")
     .data(filteredCords);
+  // var text = g.selectAll("text").data(filteredCords);
 
-  // circles.exit().remove();
+  const isHidden = i => {
+    const selectedCountry = document.querySelector("#country-select").value;
+    if (selectedCountry === "all") {
+      return true;
+    } else {
+      return (
+        filteredCountries[i].countryAbbrev.toLowerCase() ===
+        selectedCountry.toLowerCase()
+      );
+    }
+  };
 
   circles
     .enter()
     .append("g")
     .attr("class", "count-circle")
     .append("circle")
+    .attr("class", "count-circle")
+    // .remove(function(d, i) {
+    //   return !isHidden(i);
+    // })
     .attr("cx", function(d) {
       return projection(d)[0];
     })
@@ -124,6 +139,9 @@ function update(timeSlice) {
       }
     })
     .attr("fill", "red");
+  // .style("opacity", function(d, i) {
+  //   return isHidden(i) ? "1" : "0";
+  // });
 
   g.append("g")
     .selectAll("text")
@@ -145,8 +163,14 @@ function update(timeSlice) {
     .attr("dy", ".3em")
     .attr("text-anchor", "middle")
     .attr("fill", "white")
+    // .remove(function(d, i) {
+    //   return !isHidden(i);
+    // })
     .on("mouseover", tip.show)
     .on("mouseout", tip.hide);
+
+  // circles.exit().remove();
+  // text.exit().remove();
 
   timeLabel.text(countryTimeBuckets[timeSlice]);
 }
