@@ -130,6 +130,7 @@ function update(timeSlice) {
     .data(filteredCords)
     .enter()
     .append("text")
+    .attr("class", "country-count")
     .attr("x", function(d) {
       return projection(d)[0];
     })
@@ -174,6 +175,17 @@ playBtn.addEventListener("click", () => {
     console.log("clicked pause");
     clearInterval(interval);
   }
+});
+
+const resetBtn = document.querySelector("#reset");
+
+resetBtn.addEventListener("click", () => {
+  playBtn.textContent = "Play";
+  clearInterval(interval);
+  d3.selectAll("circle").remove();
+  d3.selectAll(".country-count").remove();
+  time = 0;
+  update(0);
 });
 
 // kick off update
