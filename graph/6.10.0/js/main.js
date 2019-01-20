@@ -1,7 +1,7 @@
 /*
  *    main.js
  *    Mastering Data Visualization with D3.js
- *    CoinStats
+ *    Project 3 - CoinStats
  */
 
 var margin = { left: 80, right: 100, top: 50, bottom: 100 },
@@ -13,149 +13,173 @@ var svg = d3
   .append("svg")
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom);
-
 var g = svg
   .append("g")
   .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
-// Time parser for x-scale
-var parseTime = d3.timeParse("%Y");
-// For tooltip
+var t = function() {
+  return d3.transition().duration(1000);
+};
+
+var parseTime = d3.timeParse("%d/%m/%Y");
+var formatTime = d3.timeFormat("%d/%m/%Y");
 var bisectDate = d3.bisector(function(d) {
-  return d.year;
+  return d.date;
 }).left;
+
+// Add the line for the first time
+g.append("path")
+  .attr("class", "line")
+  .attr("fill", "none")
+  .attr("stroke", "grey")
+  .attr("stroke-width", "3px");
+
+// Labels
+var xLabel = g
+  .append("text")
+  .attr("class", "x axisLabel")
+  .attr("y", height + 50)
+  .attr("x", width / 2)
+  .attr("font-size", "20px")
+  .attr("text-anchor", "middle")
+  .text("Time");
+var yLabel = g
+  .append("text")
+  .attr("class", "y axisLabel")
+  .attr("transform", "rotate(-90)")
+  .attr("y", -60)
+  .attr("x", -170)
+  .attr("font-size", "20px")
+  .attr("text-anchor", "middle")
+  .text("Price (USD)");
 
 // Scales
 var x = d3.scaleTime().range([0, width]);
 var y = d3.scaleLinear().range([height, 0]);
 
-// Axis generators
-var xAxisCall = d3.axisBottom();
-var yAxisCall = d3
-  .axisLeft()
-  .ticks(6)
-  .tickFormat(function(d) {
-    return parseInt(d / 1000) + "k";
-  });
-
-// Axis groups
+// X-axis
+var xAxisCall = d3.axisBottom().ticks(4);
 var xAxis = g
   .append("g")
   .attr("class", "x axis")
   .attr("transform", "translate(0," + height + ")");
+
+// Y-axis
+var yAxisCall = d3.axisLeft();
 var yAxis = g.append("g").attr("class", "y axis");
 
-// Y-Axis label
-yAxis
-  .append("text")
-  .attr("class", "axis-title")
-  .attr("transform", "rotate(-90)")
-  .attr("y", 6)
-  .attr("dy", ".71em")
-  .style("text-anchor", "end")
-  .attr("fill", "#5D6971")
-  .text("Population)");
+// Event listeners
+$("#coin-select").on("change", update);
+$("#var-select").on("change", update);
 
-// Line path generator
-var line = d3
-  .line()
-  .x(function(d) {
-    return x(d.year);
-  })
-  .y(function(d) {
-    return y(parseInt(d.value));
-  });
-
-// ADD SLIDER
+// Add jQuery UI slider
 $("#date-slider").slider({
-  max: 100,
-  min: 0,
-  step: 1,
-  range: false,
-  value: 50,
-  slide: function(evt, ui) {
-    console.log(ui.value);
+  range: true,
+  max: parseTime("31/10/2017").getTime(),
+  min: parseTime("12/5/2013").getTime(),
+  step: 86400000, // One day
+  values: [parseTime("12/5/2013").getTime(), parseTime("31/10/2017").getTime()],
+  slide: function(event, ui) {
+    $("#dateLabel1").text(formatTime(new Date(ui.values[0])));
+    $("#dateLabel2").text(formatTime(new Date(ui.values[1])));
+    update();
   }
 });
 
-$("#date-slider").slider("value", 100);
+d3.json("data/coins.json").then(function(data) {
+  // console.log(data);
 
-// DATA BELOW
+  // Prepare and clean data
+  filteredData = {};
+  for (var coin in data) {
+    if (!data.hasOwnProperty(coin)) {
+      continue;
+    }
+    filteredData[coin] = data[coin].filter(function(d) {
+      return !(d["price_usd"] == null);
+    });
+    filteredData[coin].forEach(function(d) {
+      d["price_usd"] = +d["price_usd"];
+      d["24h_vol"] = +d["24h_vol"];
+      d["market_cap"] = +d["market_cap"];
+      d["date"] = parseTime(d["date"]);
+    });
+  }
 
-d3.json("../data/coins.json").then(function(data) {
-  console.log("data", data);
+  // Run the visualization for the first time
+  update();
+});
 
-  const selectedCoin = "bitcoin";
-  const selectedValue = "price_usd";
-  const selecteDate = "24h_vol";
-  const parseTime = d3.timeParse("%d/%m/%Y");
-  const valueFormat = d3.format(",.0f");
-  console.log("time parse", parseTime("11/12/2014"));
+function update() {
+  // Filter data based on selections
+  var coin = $("#coin-select").val(),
+    yValue = $("#var-select").val(),
+    sliderValues = $("#date-slider").slider("values");
+  var dataTimeFiltered = filteredData[coin].filter(function(d) {
+    return d.date >= sliderValues[0] && d.date <= sliderValues[1];
+  });
 
-  // Data cleaning
-  let dataExists = x => x.market_cap && x.price_usd && x["24h_vol"] !== null;
-  bitcoinData = data[selectedCoin].filter(dataExists).map(x => ({
-    value: x[selectedValue],
-    date: parseTime(x.date)
-  }));
-
-  currentData = bitcoinData;
-  console.log("current data", currentData);
-
-  // Set scale domains
+  // Update scales
   x.domain(
-    d3.extent(currentData, function(d) {
+    d3.extent(dataTimeFiltered, function(d) {
       return d.date;
     })
   );
   y.domain([
-    d3.min(currentData, function(d) {
-      return d.value;
+    d3.min(dataTimeFiltered, function(d) {
+      return d[yValue];
     }) / 1.005,
-    d3.max(currentData, function(d) {
-      return d.value;
+    d3.max(dataTimeFiltered, function(d) {
+      return d[yValue];
     }) * 1.005
   ]);
 
-  // Generate axes once scales have been set
-  xAxis.call(xAxisCall.scale(x));
-  yAxis.call(yAxisCall.scale(y));
+  // Fix for format values
+  var formatSi = d3.format(".2s");
+  function formatAbbreviation(x) {
+    var s = formatSi(x);
+    switch (s[s.length - 1]) {
+      case "G":
+        return s.slice(0, -1) + "B";
+      case "k":
+        return s.slice(0, -1) + "K";
+    }
+    return s;
+  }
 
-  // Add line to chart
-  g.append("path")
-    .attr("class", "line")
-    .attr("fill", "none")
-    .attr("stroke", "grey")
-    .attr("stroke-with", "3px")
-    .attr("d", line(currentData));
+  // Update axes
+  xAxisCall.scale(x);
+  xAxis.transition(t()).call(xAxisCall);
+  yAxisCall.scale(y);
+  yAxis.transition(t()).call(yAxisCall.tickFormat(formatAbbreviation));
 
-  /******************************** Tooltip Code ********************************/
+  // Clear old tooltips
+  d3.select(".focus").remove();
+  d3.select(".overlay").remove();
 
+  // Tooltip code
   var focus = g
     .append("g")
     .attr("class", "focus")
     .style("display", "none");
-
   focus
     .append("line")
     .attr("class", "x-hover-line hover-line")
     .attr("y1", 0)
     .attr("y2", height);
-
   focus
     .append("line")
     .attr("class", "y-hover-line hover-line")
     .attr("x1", 0)
     .attr("x2", width);
-
-  focus.append("circle").attr("r", 7.5);
-
+  focus.append("circle").attr("r", 5);
   focus
     .append("text")
     .attr("x", 15)
     .attr("dy", ".31em");
-
-  g.append("rect")
+  svg
+    .append("rect")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
     .attr("class", "overlay")
     .attr("width", width)
     .attr("height", height)
@@ -169,15 +193,42 @@ d3.json("../data/coins.json").then(function(data) {
 
   function mousemove() {
     var x0 = x.invert(d3.mouse(this)[0]),
-      i = bisectDate(currentData, x0, 1),
-      d0 = currentData[i - 1],
-      d1 = currentData[i],
-      d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-    focus.attr("transform", "translate(" + x(d.date) + "," + y(d.value) + ")");
-    focus.select("text").text(d.value);
-    focus.select(".x-hover-line").attr("y2", height - y(d.value));
+      i = bisectDate(dataTimeFiltered, x0, 1),
+      d0 = dataTimeFiltered[i - 1],
+      d1 = dataTimeFiltered[i],
+      d = d1 && d0 ? (x0 - d0.date > d1.date - x0 ? d1 : d0) : 0;
+    focus.attr(
+      "transform",
+      "translate(" + x(d.date) + "," + y(d[yValue]) + ")"
+    );
+    focus.select("text").text(function() {
+      return d3.format("$,")(d[yValue].toFixed(2));
+    });
+    focus.select(".x-hover-line").attr("y2", height - y(d[yValue]));
     focus.select(".y-hover-line").attr("x2", -x(d.date));
   }
 
-  /******************************** Tooltip Code ********************************/
-});
+  // Path generator
+  line = d3
+    .line()
+    .x(function(d) {
+      return x(d.date);
+    })
+    .y(function(d) {
+      return y(d[yValue]);
+    });
+
+  // Update our line path
+  g.select(".line")
+    .transition(t)
+    .attr("d", line(dataTimeFiltered));
+
+  // Update y-axis label
+  var newText =
+    yValue == "price_usd"
+      ? "Price (USD)"
+      : yValue == "market_cap"
+      ? "Market Capitalization (USD)"
+      : "24 Hour Trading Volume (USD)";
+  yLabel.text(newText);
+}
