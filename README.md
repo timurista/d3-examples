@@ -24,3 +24,32 @@ sign: - will show negative for negative numbers, + only for positive.
 ## Time parse
 
 `d3.timeParse('%y/%m/%d') // time formatting parser and formatting`
+
+## Best sites to find boiler-plat code
+
+blocks.org
+and blockbuilder.org
+
+## V5
+
+no queues for loading multiple data
+now promises
+d3.schemeCategory20
+
+## D3 design toolkit
+
+data into one of 3. Ordinal (ranking), Categorical (African, Asian, etc). Quantitative (numerical)
+Position and length numbers. For ranking, use area. Categories use shapes or colors. Dont use more than 5-8 colors.
+
+## D3 Layouts
+
+to quickly create all kinds of visualizations.
+spits out same data, then these values in path generator.
+
+## D3 Legacy Notes
+
+d3.layout.pie() --> d3.pie()
+
+### community one
+
+d3.layout.cloud --> d3.layout.cloud
