@@ -78,3 +78,6 @@ var entries = d3
 ```
 
 should update with far less lag
+
+updates from v4
+d3.scale.category20() --> d3.scaleOrdinal(d3.schemeCategory20)
