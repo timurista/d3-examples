@@ -53,3 +53,28 @@ d3.layout.pie() --> d3.pie()
 ### community one
 
 d3.layout.cloud --> d3.layout.cloud
+
+## data structure
+
+pick right data structure in first place can improve performance.
+
+size of id with size of homer. Need to do brute force search. Thousands of rows.
+COnvert data into object.
+
+## d3 nest
+
+d3 nest, group data according to different keys.
+
+```js
+var entries = d3
+  .nest()
+  .key(function(d) {
+    return d.year;
+  })
+  .key(function(d) {
+    return d.variety;
+  })
+  .entries(yields);
+```
+
+should update with far less lag
