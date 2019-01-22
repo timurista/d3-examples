@@ -30,6 +30,9 @@
       y = d3.scaleLinear().range([height, 0]),
       z = d3.scaleOrdinal(d3.schemeCategory20);
     var stack = d3.stack();
+
+    // area generator writes upper / lower boundary
+    // x cords and pass each value to scale
     var area = d3
       .area()
       .x(function(d) {
