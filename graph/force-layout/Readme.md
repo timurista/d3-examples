@@ -15,3 +15,7 @@ use force collision d3.forceCollide().radius(function(d) { return d.radius})
 force x, force y can gravitate things towards a point
 
 link force to make linked elements a fixed distance apart.
+
+## Node Link diagrams
+
+YOu can make use of various elements
