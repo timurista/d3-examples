@@ -18,4 +18,5 @@ link force to make linked elements a fixed distance apart.
 
 ## Node Link diagrams
 
-YOu can make use of various elements
+You can make use of various elements
+Highlights relationship in node list.
