@@ -3,6 +3,7 @@ import logo from "./logo.svg";
 import "./App.css";
 import Graph from "./components/graph";
 import Shapes from "./components/basic-svg";
+import PackedCircles from "./components/packed-circle";
 class App extends Component {
   render() {
     return (
@@ -10,8 +11,7 @@ class App extends Component {
         <header className="App-header">
           <h2>Graphs</h2>
         </header>
-        <Graph />
-        <Shapes />
+        <PackedCircles />
       </div>
     );
   }
